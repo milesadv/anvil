@@ -51,13 +51,13 @@ export default function Page() {
     }, 1500)
   }, [])
 
-  // Handle mouse movement in frequency mode
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+  // Handle mouse/touch movement in frequency mode
+  const handlePointerMove = useCallback((clientX: number, clientY: number) => {
     if (!isFrequencyMode) return
 
     const { type, frequency } = mapMouseToFilter(
-      e.clientX,
-      e.clientY,
+      clientX,
+      clientY,
       window.innerWidth,
       window.innerHeight
     )
@@ -70,6 +70,16 @@ export default function Page() {
 
     audioControls.setFilter(type, frequency)
   }, [isFrequencyMode, audioControls, showLabelBriefly])
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    handlePointerMove(e.clientX, e.clientY)
+  }, [handlePointerMove])
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length > 0) {
+      handlePointerMove(e.touches[0].clientX, e.touches[0].clientY)
+    }
+  }, [handlePointerMove])
 
   // Toggle frequency mode
   const toggleFrequencyMode = useCallback(() => {
@@ -189,8 +199,9 @@ export default function Page() {
 
   return (
     <div
-      className="w-full h-screen bg-black relative"
+      className="w-full h-dvh bg-black relative overflow-hidden touch-none"
       onMouseMove={handleMouseMove}
+      onTouchMove={handleTouchMove}
     >
       <Canvas camera={{ position: [0, 0, 5], fov: 45 }} gl={{ antialias: true }}>
         {mode === "idle" && <TorusShader />}
@@ -207,7 +218,7 @@ export default function Page() {
       {/* Audio upload - bottom left */}
       {mode === "idle" && (
         <div
-          className="absolute bottom-6 left-6"
+          className="absolute bottom-6 left-6 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]"
           onDragOver={(e) => {
             e.preventDefault()
             setIsDragging(true)
@@ -235,7 +246,7 @@ export default function Page() {
       )}
 
       {/* Email capture - bottom right */}
-      <div className="absolute bottom-6 right-6 text-right">
+      <div className="absolute bottom-6 right-6 pb-[env(safe-area-inset-bottom)] pr-[env(safe-area-inset-right)] text-right">
         {emailStatus === "success" ? (
           <p className="text-white/60 text-sm tracking-wide">you&apos;re on the list</p>
         ) : (
@@ -247,7 +258,7 @@ export default function Page() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your email"
                 required
-                className="bg-transparent border-b border-white/20 text-white/80 text-sm px-0 py-1 w-48 focus:outline-none focus:border-white/50 placeholder:text-white/30 transition-all duration-700 hover:border-white/40 animate-[subtle-pulse_4s_ease-in-out_3s_infinite]"
+                className="bg-transparent border-b border-white/20 text-white/80 text-sm px-0 py-1 w-36 sm:w-48 focus:outline-none focus:border-white/50 placeholder:text-white/30 transition-all duration-700 hover:border-white/40 animate-[subtle-pulse_4s_ease-in-out_3s_infinite]"
               />
               <button
                 type="submit"
@@ -268,7 +279,7 @@ export default function Page() {
       {mode === "audio" && (
         <button
           onClick={toggleFrequencyMode}
-          className={`absolute top-6 right-6 text-sm tracking-wide transition-colors ${
+          className={`absolute top-6 right-6 pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] text-sm tracking-wide transition-colors ${
             isFrequencyMode
               ? "text-white/80"
               : "text-white/30 hover:text-white/70"
@@ -280,7 +291,7 @@ export default function Page() {
 
       {/* Audio controls - shown when audio is loaded */}
       {hasAudio && (
-        <div className="absolute top-6 left-6 flex items-center gap-4">
+        <div className="absolute top-6 left-6 pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] flex items-center gap-4">
           {/* Time */}
           <span className="text-white/20 text-xs font-mono">
             {formatTime(audioData.currentTime)} / {formatTime(audioData.duration)}
@@ -321,7 +332,7 @@ export default function Page() {
       {mode !== "idle" && (
         <button
           onClick={reset}
-          className="absolute top-6 left-1/2 -translate-x-1/2 text-white/30 hover:text-white/70 transition-colors text-sm tracking-wide"
+          className="absolute top-6 left-1/2 -translate-x-1/2 pt-[env(safe-area-inset-top)] text-white/30 hover:text-white/70 transition-colors text-sm tracking-wide"
         >
           reset
         </button>
