@@ -201,7 +201,7 @@ export default function Page() {
       <div className={`absolute inset-0 flex items-center justify-center select-none mix-blend-plus-lighter pointer-events-none transition-opacity duration-500 ${isZooming ? "opacity-0" : "opacity-100"}`}>
         <button
           onClick={handleAnvilClick}
-          className="font-sans text-white/40 text-3xl font-medium tracking-[0.1em] cursor-pointer hover:text-white/50 transition-colors pointer-events-auto"
+          className="font-sans text-white/40 text-2xl sm:text-3xl font-medium tracking-[0.1em] cursor-pointer hover:text-white/50 active:text-white/60 transition-colors pointer-events-auto min-h-[44px] min-w-[44px] flex items-center justify-center"
           style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3), 0 0 20px rgba(255,255,255,0.3)' }}
         >
           anvil.
@@ -211,7 +211,7 @@ export default function Page() {
       {/* Audio upload - bottom left */}
       {mode === "idle" && !isZooming && (
         <div
-          className="absolute bottom-6 left-6 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]"
+          className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]"
           onDragOver={(e) => {
             e.preventDefault()
             setIsDragging(true)
@@ -221,8 +221,8 @@ export default function Page() {
         >
           <label
             htmlFor="audio-upload"
-            className={`block cursor-pointer transition-all duration-200 ${
-              isDragging ? "text-white" : "text-white/40 hover:text-white/70"
+            className={`block cursor-pointer transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center ${
+              isDragging ? "text-white" : "text-white/40 hover:text-white/70 active:text-white/80"
             }`}
           >
             <span className="text-sm tracking-wide">audio</span>
@@ -243,10 +243,10 @@ export default function Page() {
       {mode === "audio" && (
         <button
           onClick={toggleFrequencyMode}
-          className={`absolute top-6 right-6 pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] text-sm tracking-wide transition-colors ${
+          className={`absolute top-4 right-4 sm:top-6 sm:right-6 pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] text-sm tracking-wide transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
             isFrequencyMode
               ? "text-white/80"
-              : "text-white/30 hover:text-white/70"
+              : "text-white/30 hover:text-white/70 active:text-white/80"
           }`}
         >
           ~ frequency
@@ -255,7 +255,7 @@ export default function Page() {
 
       {/* Audio controls - shown when audio is loaded */}
       {hasAudio && (
-        <div className="absolute top-6 left-6 pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] flex items-center gap-4">
+        <div className="absolute top-4 left-4 sm:top-6 sm:left-6 pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] flex items-center gap-2 sm:gap-4">
           {/* Time */}
           <span className="text-white/20 text-xs font-mono">
             {formatTime(audioData.currentTime)} / {formatTime(audioData.duration)}
@@ -296,7 +296,7 @@ export default function Page() {
       {mode !== "idle" && (
         <button
           onClick={reset}
-          className="absolute top-6 left-1/2 -translate-x-1/2 pt-[env(safe-area-inset-top)] text-white/30 hover:text-white/70 transition-colors text-sm tracking-wide"
+          className="absolute top-4 sm:top-6 left-1/2 -translate-x-1/2 pt-[env(safe-area-inset-top)] text-white/30 hover:text-white/70 active:text-white/80 transition-colors text-sm tracking-wide min-h-[44px] min-w-[44px] flex items-center justify-center"
         >
           reset
         </button>
