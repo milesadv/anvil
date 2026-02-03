@@ -4,6 +4,7 @@ import React from "react"
 
 import { Canvas } from "@react-three/fiber"
 import { useState, useCallback, useRef, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { AudioParticles } from "@/components/audio-particles"
 import { TorusShader } from "@/components/torus-shader"
 import { useAudioAnalyzer, type FilterType } from "@/hooks/use-audio-analyzer"
@@ -25,16 +26,22 @@ function mapMouseToFilter(mouseX: number, mouseY: number, screenWidth: number, s
 }
 
 export default function Page() {
+  const router = useRouter()
   const [hasAudio, setHasAudio] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [isFrequencyMode, setIsFrequencyMode] = useState(false)
   const [showFilterLabel, setShowFilterLabel] = useState(false)
+  const [isZooming, setIsZooming] = useState(false)
   const filterLabelTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastFilterTypeRef = useRef<FilterType | null>(null)
 
-  // Email form state
-  const [email, setEmail] = useState("")
-  const [emailStatus, setEmailStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
+  const handleAnvilClick = useCallback(() => {
+    setIsZooming(true)
+    setTimeout(() => {
+      router.push("/about")
+    }, 800)
+  }, [router])
+
 
   const audioInputRef = useRef<HTMLInputElement>(null)
 
@@ -173,28 +180,6 @@ export default function Page() {
     return `${mins}:${secs.toString().padStart(2, "0")}`
   }
 
-  const handleEmailSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email || emailStatus === "loading") return
-
-    setEmailStatus("loading")
-    try {
-      const res = await fetch("/api/join", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      })
-      if (res.ok) {
-        setEmailStatus("success")
-        setEmail("")
-      } else {
-        setEmailStatus("error")
-      }
-    } catch {
-      setEmailStatus("error")
-    }
-  }
-
   const mode = hasAudio ? "audio" : "idle"
 
   return (
@@ -203,20 +188,28 @@ export default function Page() {
       onMouseMove={handleMouseMove}
       onTouchMove={handleTouchMove}
     >
-      <Canvas camera={{ position: [0, 0, 5], fov: 45 }} gl={{ antialias: true }}>
-        {mode === "idle" && <TorusShader />}
-        {mode === "audio" && <AudioParticles audioData={audioData} />}
-      </Canvas>
+      <div
+        className={`w-full h-full transition-transform duration-700 ease-in ${isZooming ? "scale-[3]" : "scale-100"}`}
+      >
+        <Canvas camera={{ position: [0, 0, 5], fov: 45 }} gl={{ antialias: true }}>
+          {mode === "idle" && <TorusShader />}
+          {mode === "audio" && <AudioParticles audioData={audioData} />}
+        </Canvas>
+      </div>
 
       {/* Brand wordmark - center */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-        <span className="text-white/40 text-sm font-medium tracking-[0.25em]">
-          Anvil
-        </span>
+      <div className={`absolute inset-0 flex items-center justify-center select-none mix-blend-plus-lighter pointer-events-none transition-opacity duration-500 ${isZooming ? "opacity-0" : "opacity-100"}`}>
+        <button
+          onClick={handleAnvilClick}
+          className="font-sans text-white/40 text-3xl font-medium tracking-[0.1em] cursor-pointer hover:text-white/50 transition-colors pointer-events-auto"
+          style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3), 0 0 20px rgba(255,255,255,0.3)' }}
+        >
+          anvil.
+        </button>
       </div>
 
       {/* Audio upload - bottom left */}
-      {mode === "idle" && (
+      {mode === "idle" && !isZooming && (
         <div
           className="absolute bottom-6 left-6 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]"
           onDragOver={(e) => {
@@ -245,35 +238,6 @@ export default function Page() {
         </div>
       )}
 
-      {/* Email capture - bottom right */}
-      <div className="absolute bottom-6 right-6 pb-[env(safe-area-inset-bottom)] pr-[env(safe-area-inset-right)] text-right">
-        {emailStatus === "success" ? (
-          <p className="text-white/60 text-sm tracking-wide">you&apos;re on the list</p>
-        ) : (
-          <>
-            <form onSubmit={handleEmailSubmit} className="flex items-center gap-2">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your email"
-                required
-                className="bg-transparent border-b border-white/20 text-white/80 text-sm px-0 py-1 w-36 sm:w-48 focus:outline-none focus:border-white/50 placeholder:text-white/30 transition-all duration-700 hover:border-white/40 animate-[subtle-pulse_4s_ease-in-out_3s_infinite]"
-              />
-              <button
-                type="submit"
-                disabled={emailStatus === "loading"}
-                className="text-white/40 text-sm tracking-wide hover:text-white/70 transition-colors disabled:opacity-50"
-              >
-                {emailStatus === "loading" ? "..." : "notify"}
-              </button>
-            </form>
-            {emailStatus === "error" && (
-              <p className="text-red-400/60 text-xs mt-2">something went wrong</p>
-            )}
-          </>
-        )}
-      </div>
 
       {/* Frequency toggle - shown when audio is playing */}
       {mode === "audio" && (
