@@ -25,6 +25,8 @@ function mapMouseToFilter(mouseX: number, mouseY: number, screenWidth: number, s
   return { type, frequency }
 }
 
+const ANVIL_LETTERS = ['a', 'n', 'v', 'i', 'l', '.']
+
 export default function Page() {
   const router = useRouter()
   const [hasAudio, setHasAudio] = useState(false)
@@ -32,14 +34,21 @@ export default function Page() {
   const [isFrequencyMode, setIsFrequencyMode] = useState(false)
   const [showFilterLabel, setShowFilterLabel] = useState(false)
   const [isZooming, setIsZooming] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
   const filterLabelTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastFilterTypeRef = useRef<FilterType | null>(null)
+
+  // Trigger load animation
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoaded(true), 100)
+    return () => clearTimeout(timer)
+  }, [])
 
   const handleAnvilClick = useCallback(() => {
     setIsZooming(true)
     setTimeout(() => {
       router.push("/about")
-    }, 800)
+    }, 850)
   }, [router])
 
 
@@ -184,12 +193,16 @@ export default function Page() {
 
   return (
     <div
-      className="w-full h-dvh bg-black relative overflow-hidden touch-none"
+      className={`w-full h-dvh bg-black relative overflow-hidden touch-none transition-opacity duration-1000 ${isLoaded ? "opacity-100" : "opacity-0"}`}
       onMouseMove={handleMouseMove}
       onTouchMove={handleTouchMove}
     >
       <div
-        className={`w-full h-full transition-transform duration-700 ease-in ${isZooming ? "scale-[3]" : "scale-100"}`}
+        className="w-full h-full"
+        style={{
+          opacity: isZooming ? 0 : 1,
+          transition: isZooming ? 'opacity 0.8s ease-in-out' : 'none'
+        }}
       >
         <Canvas camera={{ position: [0, 0, 5], fov: 45 }} gl={{ antialias: true }}>
           {mode === "idle" && <TorusShader />}
@@ -197,14 +210,42 @@ export default function Page() {
         </Canvas>
       </div>
 
+      {/* Fade overlay for transition */}
+      <div
+        className="absolute inset-0 bg-black pointer-events-none"
+        style={{
+          opacity: isZooming ? 1 : 0,
+          transition: isZooming ? 'opacity 0.6s ease-in 0.3s' : 'none'
+        }}
+      />
+
       {/* Brand wordmark - center */}
-      <div className={`absolute inset-0 flex items-center justify-center select-none mix-blend-plus-lighter pointer-events-none transition-opacity duration-500 ${isZooming ? "opacity-0" : "opacity-100"}`}>
+      <div
+        className="absolute inset-0 flex items-center justify-center select-none mix-blend-plus-lighter pointer-events-none"
+        style={{
+          opacity: isZooming ? 0 : 1,
+          transition: isZooming ? 'opacity 0.4s ease-out' : 'opacity 0.5s ease-out'
+        }}
+      >
         <button
           onClick={handleAnvilClick}
-          className="font-sans text-white/40 text-2xl sm:text-3xl font-medium tracking-[0.1em] cursor-pointer hover:text-white/50 active:text-white/60 transition-colors pointer-events-auto min-h-[44px] min-w-[44px] flex items-center justify-center"
-          style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3), 0 0 20px rgba(255,255,255,0.3)' }}
+          className="font-sans text-2xl sm:text-3xl font-medium tracking-[0.1em] cursor-pointer pointer-events-auto min-h-[44px] min-w-[44px] flex items-center justify-center gap-[0.1em] group"
         >
-          anvil.
+          {ANVIL_LETTERS.map((letter, index) => (
+            <span
+              key={index}
+              className="text-white/40 group-hover:text-white/50 active:text-white/60 transition-colors duration-300 animate-float inline-block"
+              style={{
+                textShadow: '0 1px 2px rgba(0,0,0,0.3), 0 0 20px rgba(255,255,255,0.3)',
+                animationDelay: `${index * 0.15}s`,
+                opacity: isLoaded ? 1 : 0,
+                transform: isLoaded ? 'translateY(0)' : 'translateY(10px)',
+                transition: `opacity 0.6s ease-out ${index * 0.1}s, transform 0.6s ease-out ${index * 0.1}s, color 0.3s ease`
+              }}
+            >
+              {letter}
+            </span>
+          ))}
         </button>
       </div>
 
@@ -212,6 +253,11 @@ export default function Page() {
       {mode === "idle" && !isZooming && (
         <div
           className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]"
+          style={{
+            opacity: isLoaded ? 1 : 0,
+            transform: isLoaded ? 'translateY(0)' : 'translateY(10px)',
+            transition: 'opacity 0.6s ease-out 0.4s, transform 0.6s ease-out 0.4s'
+          }}
           onDragOver={(e) => {
             e.preventDefault()
             setIsDragging(true)
@@ -221,11 +267,11 @@ export default function Page() {
         >
           <label
             htmlFor="audio-upload"
-            className={`block cursor-pointer transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center ${
+            className={`block cursor-pointer transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center ${
               isDragging ? "text-white" : "text-white/40 hover:text-white/70 active:text-white/80"
             }`}
           >
-            <span className="text-sm tracking-wide">audio</span>
+            <span className="text-sm tracking-wide">a</span>
           </label>
           <input
             ref={audioInputRef}
