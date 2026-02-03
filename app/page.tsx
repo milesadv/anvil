@@ -221,7 +221,7 @@ export default function Page() {
 
       {/* Brand wordmark - center */}
       <div
-        className="absolute inset-0 flex items-center justify-center select-none mix-blend-plus-lighter pointer-events-none"
+        className="absolute inset-0 flex flex-col items-center justify-center select-none mix-blend-plus-lighter pointer-events-none"
         style={{
           opacity: isZooming ? 0 : 1,
           transition: isZooming ? 'opacity 0.4s ease-out' : 'opacity 0.5s ease-out'
@@ -249,40 +249,15 @@ export default function Page() {
         </button>
       </div>
 
-      {/* Audio upload - bottom left */}
-      {mode === "idle" && !isZooming && (
-        <div
-          className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]"
-          style={{
-            opacity: isLoaded ? 1 : 0,
-            transform: isLoaded ? 'translateY(0)' : 'translateY(10px)',
-            transition: 'opacity 0.6s ease-out 0.4s, transform 0.6s ease-out 0.4s'
-          }}
-          onDragOver={(e) => {
-            e.preventDefault()
-            setIsDragging(true)
-          }}
-          onDragLeave={() => setIsDragging(false)}
-          onDrop={handleDrop}
-        >
-          <label
-            htmlFor="audio-upload"
-            className={`block cursor-pointer transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center ${
-              isDragging ? "text-white" : "text-white/40 hover:text-white/70 active:text-white/80"
-            }`}
-          >
-            <span className="text-sm tracking-wide">a</span>
-          </label>
-          <input
-            ref={audioInputRef}
-            id="audio-upload"
-            type="file"
-            accept="audio/*"
-            onChange={handleAudioSelect}
-            className="hidden"
-          />
-        </div>
-      )}
+      {/* Audio upload - hidden for now */}
+      <input
+        ref={audioInputRef}
+        id="audio-upload"
+        type="file"
+        accept="audio/*"
+        onChange={handleAudioSelect}
+        className="hidden"
+      />
 
 
       {/* Frequency toggle - shown when audio is playing */}
