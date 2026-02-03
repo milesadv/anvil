@@ -24,8 +24,8 @@ const cormorant = Cormorant_Garamond({
 })
 
 export const metadata: Metadata = {
-  title: "Self Made Good",
-  description: "Ora et Labora. Luxury through labour.",
+  title: "Anvil",
+  description: "Crafting foundations",
 }
 
 export const viewport: Viewport = {

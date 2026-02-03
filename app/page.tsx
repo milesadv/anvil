@@ -211,7 +211,7 @@ export default function Page() {
       {/* Brand wordmark - center */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
         <span className="text-white/40 text-sm font-medium tracking-[0.25em]">
-          self made good
+          Anvil
         </span>
       </div>
 
