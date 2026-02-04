@@ -234,7 +234,7 @@ export default function CaseStudyPage({ params }: PageProps) {
             href="/case-studies"
             className="text-white/30 text-sm font-normal tracking-wide hover:text-white/50 transition-colors duration-500 min-h-[44px] inline-flex items-center"
           >
-            All work
+            all work
           </Link>
           {nextCaseStudy && (
             <Link
