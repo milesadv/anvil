@@ -5,6 +5,30 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getCaseStudy, getNextCaseStudy } from "@/lib/case-studies"
 import { TextWithParticles } from "@/components/text-with-particles"
+import { MetricCard } from "@/components/metric-card"
+
+// Parse impact string to extract metric value and description
+function parseImpact(impact: string): { value: string; label: string } | null {
+  // Match patterns like "90% reduction..." or "3 weeks earlier..." or "200+ active projects..."
+  const patterns = [
+    /^(\d+%)\s+(.+)$/,           // "90% reduction..."
+    /^(\d+\+?)\s+(.+)$/,         // "200+ active projects..."
+    /^(\d+)\s+(weeks?|days?|hours?)\s+(.+)$/i,  // "3 weeks earlier..."
+  ]
+
+  for (const pattern of patterns) {
+    const match = impact.match(pattern)
+    if (match) {
+      if (pattern === patterns[2]) {
+        // Time-based pattern
+        return { value: `${match[1]} ${match[2]}`, label: match[3] }
+      }
+      return { value: match[1], label: match[2] }
+    }
+  }
+
+  return null
+}
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -34,6 +58,15 @@ export default function CaseStudyPage({ params }: PageProps) {
   if (!caseStudy) {
     notFound()
   }
+
+  // Parse impact items
+  const parsedImpacts = caseStudy.impact.map(item => ({
+    original: item,
+    parsed: parseImpact(item)
+  }))
+
+  const metricsWithValues = parsedImpacts.filter(i => i.parsed !== null)
+  const metricsWithoutValues = parsedImpacts.filter(i => i.parsed === null)
 
   return (
     <div className="w-full min-h-dvh bg-black relative overflow-y-auto overscroll-y-contain scroll-smooth">
@@ -88,7 +121,7 @@ export default function CaseStudyPage({ params }: PageProps) {
 
         {/* Context */}
         <div
-          className="mb-12 sm:mb-16"
+          className="mb-16 sm:mb-20"
           style={{
             opacity: isLoaded ? 1 : 0,
             transform: isLoaded ? 'translateY(0)' : 'translateY(8px)',
@@ -107,7 +140,7 @@ export default function CaseStudyPage({ params }: PageProps) {
 
         {/* Challenges */}
         <div
-          className="mb-12 sm:mb-16"
+          className="mb-16 sm:mb-20"
           style={{
             opacity: isLoaded ? 1 : 0,
             transform: isLoaded ? 'translateY(0)' : 'translateY(8px)',
@@ -128,7 +161,7 @@ export default function CaseStudyPage({ params }: PageProps) {
 
         {/* What we built */}
         <div
-          className="mb-12 sm:mb-16"
+          className="mb-16 sm:mb-20"
           style={{
             opacity: isLoaded ? 1 : 0,
             transform: isLoaded ? 'translateY(0)' : 'translateY(8px)',
@@ -156,20 +189,36 @@ export default function CaseStudyPage({ params }: PageProps) {
             transition: 'opacity 0.8s ease-out 0.5s, transform 0.8s ease-out 0.5s'
           }}
         >
-          <h2 className="text-white/30 text-[10px] sm:text-xs font-medium tracking-[0.25em] uppercase mb-6 sm:mb-8">
+          <h2 className="text-white/30 text-[10px] sm:text-xs font-medium tracking-[0.25em] uppercase mb-8 sm:mb-10">
             Impact
           </h2>
-          <div className="space-y-5 text-sm sm:text-base font-normal leading-[1.85]">
-            {caseStudy.impact.map((item, i) => (
-              <TextWithParticles key={i} className="group text-white/45 hover:text-white/65 transition-colors duration-700">
-                <p>
-                  <span className="text-white/55 group-hover:text-white/75 transition-colors duration-700">{item.split(' ')[0]}</span>
-                  <span className="mx-1" />
-                  {item.split(' ').slice(1).join(' ')}
-                </p>
-              </TextWithParticles>
-            ))}
-          </div>
+
+          {/* Metrics grid */}
+          {metricsWithValues.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 sm:gap-10 mb-10">
+              {metricsWithValues.map((item, i) => (
+                <MetricCard
+                  key={i}
+                  value={item.parsed!.value}
+                  label={item.parsed!.label}
+                  delay={i * 150}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Remaining text items */}
+          {metricsWithoutValues.length > 0 && (
+            <div className="space-y-4">
+              {metricsWithoutValues.map((item, i) => (
+                <TextWithParticles key={i} className="text-white/45 hover:text-white/65 transition-colors duration-700">
+                  <p className="text-sm sm:text-base font-normal leading-[1.85]">
+                    {item.original}
+                  </p>
+                </TextWithParticles>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Navigation */}

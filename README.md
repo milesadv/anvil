@@ -39,7 +39,8 @@ Anvil is an operations consultancy that helps companies transform their internal
 ├── components/
 │   ├── audio-particles.tsx     # Audio-reactive particle system
 │   ├── torus-shader.tsx        # Idle state particle visualisation
-│   └── text-with-particles.tsx # Hover particle effect for text
+│   ├── text-with-particles.tsx # Hover particle effect for text
+│   └── metric-card.tsx         # Animated metric display
 ├── hooks/
 │   └── use-audio-analyzer.ts   # Web Audio API integration
 └── lib/

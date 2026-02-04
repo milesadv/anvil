@@ -56,7 +56,7 @@ export default function AboutPage() {
 
         {/* Body */}
         <div
-          className="space-y-5 text-sm sm:text-base font-normal leading-[1.85] mb-12 sm:mb-16"
+          className="space-y-5 text-sm sm:text-base font-normal leading-[1.85] mb-16 sm:mb-20"
           style={{
             opacity: isLoaded ? 1 : 0,
             transform: isLoaded ? 'translateY(0)' : 'translateY(8px)',
