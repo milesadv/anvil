@@ -111,7 +111,7 @@ export default function AboutPage() {
         >
           <TextWithParticles className="text-white/45 hover:text-white/65 transition-colors duration-700">
             <p>
-              Anvil was founded on a simple idea: the most successful companies treat their internal operations not as just monotonous box ticking, but as a source of competitive advantage.
+              Anvil was founded on a simple idea: the most successful companies treat their internal operations not as monotonous box ticking, but as a source of competitive advantage.
             </p>
           </TextWithParticles>
           <TextWithParticles className="text-white/45 hover:text-white/65 transition-colors duration-700">
