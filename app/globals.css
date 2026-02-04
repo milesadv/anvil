@@ -18,6 +18,11 @@
     height: 100dvh;
     overflow: hidden;
     -webkit-text-size-adjust: 100%;
+    scrollbar-width: none;
+  }
+
+  html::-webkit-scrollbar {
+    display: none;
   }
 
   body {
@@ -33,6 +38,21 @@
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     user-select: none;
+    scrollbar-width: none;
+  }
+
+  body::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar on all scrollable elements */
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  *::-webkit-scrollbar {
+    display: none;
   }
 
   /* Prevent pull-to-refresh */
