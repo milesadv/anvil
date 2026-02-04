@@ -4,7 +4,7 @@ import { CaseStudyCard } from "@/components/case-study-card"
 import { BackgroundBlob } from "@/components/background-blob"
 
 export const metadata = {
-  title: "Work | Self Made Good",
+  title: "Work | Anvil",
   description: "Case studies showcasing our approach to building digital products.",
 }
 
@@ -20,7 +20,7 @@ export default function CaseStudiesPage() {
             href="/"
             className="text-white/40 hover:text-white/70 text-sm tracking-[0.15em] transition-colors"
           >
-            self made good
+            anvil.
           </Link>
         </nav>
 

@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: PageProps) {
   if (!caseStudy) return {}
 
   return {
-    title: `${caseStudy.title} | Self Made Good`,
+    title: `${caseStudy.title} | Anvil`,
     description: caseStudy.description,
   }
 }
@@ -42,7 +42,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
             href="/"
             className="text-white/40 hover:text-white/70 text-sm tracking-[0.15em] transition-colors"
           >
-            self made good
+            anvil.
           </Link>
           <Link
             href="/case-studies"

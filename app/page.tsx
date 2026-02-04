@@ -4,6 +4,7 @@ import React from "react"
 import Link from "next/link"
 import { Canvas } from "@react-three/fiber"
 import { useState, useCallback, useRef, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { AudioParticles } from "@/components/audio-particles"
 import { TorusShader } from "@/components/torus-shader"
 import { useAudioAnalyzer, type FilterType } from "@/hooks/use-audio-analyzer"
@@ -24,17 +25,32 @@ function mapMouseToFilter(mouseX: number, mouseY: number, screenWidth: number, s
   return { type, frequency }
 }
 
+const ANVIL_LETTERS = ['a', 'n', 'v', 'i', 'l', '.']
+
 export default function Page() {
+  const router = useRouter()
   const [hasAudio, setHasAudio] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [isFrequencyMode, setIsFrequencyMode] = useState(false)
   const [showFilterLabel, setShowFilterLabel] = useState(false)
+  const [isZooming, setIsZooming] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
   const filterLabelTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastFilterTypeRef = useRef<FilterType | null>(null)
 
-  // Email form state
-  const [email, setEmail] = useState("")
-  const [emailStatus, setEmailStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
+  // Trigger load animation
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoaded(true), 100)
+    return () => clearTimeout(timer)
+  }, [])
+
+  const handleAnvilClick = useCallback(() => {
+    setIsZooming(true)
+    setTimeout(() => {
+      router.push("/about")
+    }, 850)
+  }, [router])
+
 
   const audioInputRef = useRef<HTMLInputElement>(null)
 
@@ -173,122 +189,95 @@ export default function Page() {
     return `${mins}:${secs.toString().padStart(2, "0")}`
   }
 
-  const handleEmailSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email || emailStatus === "loading") return
-
-    setEmailStatus("loading")
-    try {
-      const res = await fetch("/api/join", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      })
-      if (res.ok) {
-        setEmailStatus("success")
-        setEmail("")
-      } else {
-        setEmailStatus("error")
-      }
-    } catch {
-      setEmailStatus("error")
-    }
-  }
-
   const mode = hasAudio ? "audio" : "idle"
 
   return (
     <div
-      className="w-full h-dvh bg-black relative overflow-hidden touch-none"
+      className={`w-full h-dvh bg-black relative overflow-hidden touch-none transition-opacity duration-1000 ${isLoaded ? "opacity-100" : "opacity-0"}`}
       onMouseMove={handleMouseMove}
       onTouchMove={handleTouchMove}
     >
-      <Canvas camera={{ position: [0, 0, 5], fov: 45 }} gl={{ antialias: true }}>
-        {mode === "idle" && <TorusShader />}
-        {mode === "audio" && <AudioParticles audioData={audioData} />}
-      </Canvas>
+      <div
+        className="w-full h-full"
+        style={{
+          opacity: isZooming ? 0 : 1,
+          transition: isZooming ? 'opacity 0.8s ease-in-out' : 'none'
+        }}
+      >
+        <Canvas camera={{ position: [0, 0, 5], fov: 45 }} gl={{ antialias: true }}>
+          {mode === "idle" && <TorusShader />}
+          {mode === "audio" && <AudioParticles audioData={audioData} />}
+        </Canvas>
+      </div>
+
+      {/* Fade overlay for transition */}
+      <div
+        className="absolute inset-0 bg-black pointer-events-none"
+        style={{
+          opacity: isZooming ? 1 : 0,
+          transition: isZooming ? 'opacity 0.6s ease-in 0.3s' : 'none'
+        }}
+      />
 
       {/* Brand wordmark - center */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-        <span className="text-white/40 text-sm font-medium tracking-[0.25em]">
-          self made good
-        </span>
+      <div
+        className="absolute inset-0 flex flex-col items-center justify-center select-none mix-blend-plus-lighter pointer-events-none"
+        style={{
+          opacity: isZooming ? 0 : 1,
+          transition: isZooming ? 'opacity 0.4s ease-out' : 'opacity 0.5s ease-out'
+        }}
+      >
+        <button
+          onClick={handleAnvilClick}
+          className="font-sans text-2xl sm:text-3xl font-medium tracking-[0.1em] cursor-pointer pointer-events-auto min-h-[44px] min-w-[44px] flex items-center justify-center gap-[0.1em] group"
+        >
+          {ANVIL_LETTERS.map((letter, index) => (
+            <span
+              key={index}
+              className="text-white/40 group-hover:text-white/50 active:text-white/60 transition-colors duration-300 animate-float inline-block"
+              style={{
+                textShadow: '0 1px 2px rgba(0,0,0,0.3), 0 0 20px rgba(255,255,255,0.3)',
+                animationDelay: `${index * 0.15}s`,
+                opacity: isLoaded ? 1 : 0,
+                transform: isLoaded ? 'translateY(0)' : 'translateY(10px)',
+                transition: `opacity 0.6s ease-out ${index * 0.1}s, transform 0.6s ease-out ${index * 0.1}s, color 0.3s ease`
+              }}
+            >
+              {letter}
+            </span>
+          ))}
+        </button>
       </div>
 
-      {/* Audio upload - bottom left */}
+      {/* Our work link - bottom left */}
       {mode === "idle" && (
-        <div
-          className="absolute bottom-6 left-6 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] flex items-center gap-6"
-          onDragOver={(e) => {
-            e.preventDefault()
-            setIsDragging(true)
-          }}
-          onDragLeave={() => setIsDragging(false)}
-          onDrop={handleDrop}
+        <Link
+          href="/case-studies"
+          className="absolute bottom-6 left-6 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] text-white/40 hover:text-white/70 text-sm tracking-wide transition-colors"
         >
-          <label
-            htmlFor="audio-upload"
-            className={`block cursor-pointer transition-all duration-200 ${
-              isDragging ? "text-white" : "text-white/40 hover:text-white/70"
-            }`}
-          >
-            <span className="text-sm tracking-wide">audio</span>
-          </label>
-          <input
-            ref={audioInputRef}
-            id="audio-upload"
-            type="file"
-            accept="audio/*"
-            onChange={handleAudioSelect}
-            className="hidden"
-          />
-          <Link
-            href="/case-studies"
-            className="text-white/40 hover:text-white/70 text-sm tracking-wide transition-colors"
-          >
-            our work
-          </Link>
-        </div>
+          our work
+        </Link>
       )}
 
-      {/* Email capture - bottom right */}
-      <div className="absolute bottom-6 right-6 pb-[env(safe-area-inset-bottom)] pr-[env(safe-area-inset-right)] text-right">
-        {emailStatus === "success" ? (
-          <p className="text-white/60 text-sm tracking-wide">you&apos;re on the list</p>
-        ) : (
-          <>
-            <form onSubmit={handleEmailSubmit} className="flex items-center gap-2">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your email"
-                required
-                className="bg-transparent border-b border-white/20 text-white/80 text-sm px-0 py-1 w-36 sm:w-48 focus:outline-none focus:border-white/50 placeholder:text-white/30 transition-all duration-700 hover:border-white/40 animate-[subtle-pulse_4s_ease-in-out_3s_infinite]"
-              />
-              <button
-                type="submit"
-                disabled={emailStatus === "loading"}
-                className="text-white/40 text-sm tracking-wide hover:text-white/70 transition-colors disabled:opacity-50"
-              >
-                {emailStatus === "loading" ? "..." : "notify"}
-              </button>
-            </form>
-            {emailStatus === "error" && (
-              <p className="text-red-400/60 text-xs mt-2">something went wrong</p>
-            )}
-          </>
-        )}
-      </div>
+      {/* Audio upload - hidden for now */}
+      <input
+        ref={audioInputRef}
+        id="audio-upload"
+        type="file"
+        accept="audio/*"
+        onChange={handleAudioSelect}
+        className="hidden"
+      />
+
 
       {/* Frequency toggle - shown when audio is playing */}
       {mode === "audio" && (
         <button
           onClick={toggleFrequencyMode}
-          className={`absolute top-6 right-6 pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] text-sm tracking-wide transition-colors ${
+          className={`absolute top-4 right-4 sm:top-6 sm:right-6 pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] text-sm tracking-wide transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
             isFrequencyMode
               ? "text-white/80"
-              : "text-white/30 hover:text-white/70"
+              : "text-white/30 hover:text-white/70 active:text-white/80"
           }`}
         >
           ~ frequency
@@ -297,7 +286,7 @@ export default function Page() {
 
       {/* Audio controls - shown when audio is loaded */}
       {hasAudio && (
-        <div className="absolute top-6 left-6 pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] flex items-center gap-4">
+        <div className="absolute top-4 left-4 sm:top-6 sm:left-6 pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] flex items-center gap-2 sm:gap-4">
           {/* Time */}
           <span className="text-white/20 text-xs font-mono">
             {formatTime(audioData.currentTime)} / {formatTime(audioData.duration)}
@@ -338,7 +327,7 @@ export default function Page() {
       {mode !== "idle" && (
         <button
           onClick={reset}
-          className="absolute top-6 left-1/2 -translate-x-1/2 pt-[env(safe-area-inset-top)] text-white/30 hover:text-white/70 transition-colors text-sm tracking-wide"
+          className="absolute top-4 sm:top-6 left-1/2 -translate-x-1/2 pt-[env(safe-area-inset-top)] text-white/30 hover:text-white/70 active:text-white/80 transition-colors text-sm tracking-wide min-h-[44px] min-w-[44px] flex items-center justify-center"
         >
           reset
         </button>

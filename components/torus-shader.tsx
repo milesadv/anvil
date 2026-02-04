@@ -10,38 +10,39 @@ export function TorusShader() {
   const [mouse3D, setMouse3D] = useState(new THREE.Vector3(0, 0, -10))
   const { camera } = useThree()
 
-  // Create organic blob geometry with particles
-  const { positions, count } = useMemo(() => {
+  // Create expanded wave-like particle field
+  const { positions } = useMemo(() => {
     const numParticles = 35000
     const posArray = new Float32Array(numParticles * 3)
-    
+
     for (let i = 0; i < numParticles; i++) {
-      // Use golden ratio sphere distribution for even coverage
+      // Use golden ratio distribution as base
       const phi = Math.acos(1 - 2 * (i + 0.5) / numParticles)
       const theta = Math.PI * (1 + Math.sqrt(5)) * i
-      
-      // Base spherical coordinates
+
+      // Base coordinates
       let x = Math.sin(phi) * Math.cos(theta)
       let y = Math.sin(phi) * Math.sin(theta)
       let z = Math.cos(phi)
-      
-      // Apply organic deformation using multiple noise frequencies
-      const noise1 = Math.sin(x * 3 + y * 2) * Math.cos(z * 2.5) * 0.3
-      const noise2 = Math.sin(y * 4 + z * 3) * Math.cos(x * 2) * 0.2
-      const noise3 = Math.sin(z * 5 + x * 2) * Math.cos(y * 3) * 0.15
-      const noise4 = Math.sin(x * 2 - y * 3 + z) * 0.1
-      
-      // Combine noises for organic displacement
-      const displacement = 1.2 + noise1 + noise2 + noise3 + noise4
-      
-      // Add some asymmetry for more organic feel
-      const asymmetry = 1 + Math.sin(theta * 2) * 0.1 + Math.cos(phi * 3) * 0.08
-      
-      posArray[i * 3] = x * displacement * asymmetry * 1.5
-      posArray[i * 3 + 1] = y * displacement * asymmetry * 1.5
-      posArray[i * 3 + 2] = z * displacement * 1.5
+
+      // Subtle wave displacement
+      const wave1 = Math.sin(theta * 2 + phi * 2) * 0.2
+      const wave2 = Math.cos(theta * 3 - phi * 2) * 0.15
+
+      // Expanded radius with wave variation
+      const baseRadius = 2.2
+      const waveRadius = baseRadius + wave1 + wave2
+
+      // Slight horizontal stretch for wave feel
+      const stretchX = 1.15
+      const stretchY = 1.1
+      const stretchZ = 0.85
+
+      posArray[i * 3] = x * waveRadius * stretchX
+      posArray[i * 3 + 1] = y * waveRadius * stretchY
+      posArray[i * 3 + 2] = z * waveRadius * stretchZ
     }
-    
+
     return { positions: posArray, count: numParticles }
   }, [])
 
