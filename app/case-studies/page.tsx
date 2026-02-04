@@ -70,9 +70,9 @@ export default function CaseStudiesPage() {
   return (
     <div className="w-full min-h-dvh bg-black relative overflow-y-auto overscroll-y-contain scroll-smooth">
       <div className="w-full px-5 sm:px-8 md:px-12 lg:px-16 py-12 sm:py-16 pt-[calc(env(safe-area-inset-top)+2.5rem)] pb-[calc(env(safe-area-inset-bottom)+3rem)]">
-        {/* Brand wordmark */}
+        {/* Navigation */}
         <div
-          className="mb-12 sm:mb-16"
+          className="flex justify-between items-center mb-12 sm:mb-16"
           style={{
             opacity: isLoaded ? 1 : 0,
             transform: isLoaded ? 'translateY(0)' : 'translateY(8px)',
@@ -84,6 +84,12 @@ export default function CaseStudiesPage() {
             className="font-sans text-white/30 text-lg sm:text-xl font-medium tracking-[0.1em] hover:text-white/50 transition-colors duration-500 min-h-[44px] inline-flex items-center"
           >
             anvil.
+          </Link>
+          <Link
+            href="/about"
+            className="text-white/30 text-sm font-normal tracking-wide hover:text-white/50 transition-colors duration-500 min-h-[44px] inline-flex items-center"
+          >
+            about
           </Link>
         </div>
 
@@ -120,14 +126,14 @@ export default function CaseStudiesPage() {
               }}
             >
               <TextWithParticles className="text-white/45 hover:text-white/65 transition-colors duration-700">
-                <div className="py-6 sm:py-8 border-b border-white/10 group-hover:border-white/20 transition-colors duration-500">
+                <div className="py-6 sm:py-8">
                   <span className="text-white/30 text-[10px] sm:text-xs font-medium tracking-[0.25em] uppercase block mb-3 sm:mb-4 group-hover:text-white/40 transition-colors duration-500">
                     {caseStudy.subtitle}
                   </span>
                   <h2 className="text-white/55 text-lg sm:text-xl md:text-2xl font-normal tracking-[-0.01em] mb-3 sm:mb-4 group-hover:text-white/75 transition-colors duration-500">
                     {caseStudy.title}
                   </h2>
-                  <p className="text-sm sm:text-base font-normal leading-[1.85] max-w-2xl">
+                  <p className="text-sm sm:text-base font-normal leading-[1.85]">
                     {caseStudy.description}
                   </p>
                 </div>

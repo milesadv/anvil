@@ -143,7 +143,7 @@ export default function CaseStudyPage({ params }: PageProps) {
             Context
           </h2>
           <TextWithParticles className="text-white/45 hover:text-white/65 transition-colors duration-700">
-            <p className="text-sm sm:text-base font-normal leading-[1.85] max-w-2xl">
+            <p className="text-sm sm:text-base font-normal leading-[1.85]">
               {caseStudy.context}
             </p>
           </TextWithParticles>
@@ -164,7 +164,7 @@ export default function CaseStudyPage({ params }: PageProps) {
           <div className="space-y-5 text-sm sm:text-base font-normal leading-[1.85]">
             {caseStudy.challenges.map((challenge, i) => (
               <TextWithParticles key={i} className="text-white/45 hover:text-white/65 transition-colors duration-700">
-                <p className="max-w-2xl">{challenge}</p>
+                <p>{challenge}</p>
               </TextWithParticles>
             ))}
           </div>
@@ -185,7 +185,7 @@ export default function CaseStudyPage({ params }: PageProps) {
           <div className="space-y-5 text-sm sm:text-base font-normal leading-[1.85]">
             {caseStudy.whatWeBuilt.map((item, i) => (
               <TextWithParticles key={i} className="text-white/45 hover:text-white/65 transition-colors duration-700">
-                <p className="max-w-2xl">{item}</p>
+                <p>{item}</p>
               </TextWithParticles>
             ))}
           </div>
@@ -206,7 +206,7 @@ export default function CaseStudyPage({ params }: PageProps) {
           <div className="space-y-5 text-sm sm:text-base font-normal leading-[1.85]">
             {caseStudy.impact.map((item, i) => (
               <TextWithParticles key={i} className="group text-white/45 hover:text-white/65 transition-colors duration-700">
-                <p className="max-w-2xl">
+                <p>
                   <span className="text-white/55 group-hover:text-white/75 transition-colors duration-700">{item.split(' ')[0]}</span>
                   <span className="mx-1" />
                   {item.split(' ').slice(1).join(' ')}
@@ -218,7 +218,7 @@ export default function CaseStudyPage({ params }: PageProps) {
 
         {/* Navigation */}
         <div
-          className="pt-8 sm:pt-12 border-t border-white/10 flex flex-col sm:flex-row justify-between gap-6"
+          className="pt-12 sm:pt-16 flex flex-col sm:flex-row justify-between gap-6"
           style={{
             opacity: isLoaded ? 1 : 0,
             transform: isLoaded ? 'translateY(0)' : 'translateY(8px)',
@@ -229,14 +229,14 @@ export default function CaseStudyPage({ params }: PageProps) {
             href="/case-studies"
             className="text-white/30 text-sm font-normal tracking-wide hover:text-white/50 transition-colors duration-500 min-h-[44px] inline-flex items-center"
           >
-            Back to work
+            All work
           </Link>
           {nextCaseStudy && (
             <Link
               href={`/case-studies/${nextCaseStudy.slug}`}
               className="text-white/30 text-sm font-normal tracking-wide hover:text-white/50 transition-colors duration-500 min-h-[44px] inline-flex items-center"
             >
-              Next: {nextCaseStudy.title}
+              {nextCaseStudy.title}
             </Link>
           )}
         </div>

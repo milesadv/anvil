@@ -1,7 +1,6 @@
 "use client"
 
 import React from "react"
-import Link from "next/link"
 import { Canvas } from "@react-three/fiber"
 import { useState, useCallback, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -30,7 +29,6 @@ const ANVIL_LETTERS = ['a', 'n', 'v', 'i', 'l', '.']
 export default function Page() {
   const router = useRouter()
   const [hasAudio, setHasAudio] = useState(false)
-  const [isDragging, setIsDragging] = useState(false)
   const [isFrequencyMode, setIsFrequencyMode] = useState(false)
   const [showFilterLabel, setShowFilterLabel] = useState(false)
   const [isZooming, setIsZooming] = useState(false)
@@ -151,21 +149,6 @@ export default function Page() {
     }
   }, [audioControls])
 
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault()
-      setIsDragging(false)
-
-      const file = e.dataTransfer.files[0]
-      if (!file) return
-
-      if (file.type.startsWith("audio/")) {
-        handleAudio(file)
-      }
-    },
-    [handleAudio]
-  )
-
   const handleAudioSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0]
@@ -249,15 +232,6 @@ export default function Page() {
         </button>
       </div>
 
-      {/* Our work link - bottom left */}
-      {mode === "idle" && (
-        <Link
-          href="/case-studies"
-          className="absolute bottom-6 left-6 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] text-white/40 hover:text-white/70 text-sm tracking-wide transition-colors"
-        >
-          our work
-        </Link>
-      )}
 
       {/* Audio upload - hidden for now */}
       <input

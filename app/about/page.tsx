@@ -156,6 +156,23 @@ export default function AboutPage() {
             </TextWithParticles>
           </div>
         </div>
+
+        {/* Work link */}
+        <div
+          className="mt-16 sm:mt-20"
+          style={{
+            opacity: isLoaded ? 1 : 0,
+            transform: isLoaded ? 'translateY(0)' : 'translateY(8px)',
+            transition: 'opacity 0.8s ease-out 0.4s, transform 0.8s ease-out 0.4s'
+          }}
+        >
+          <Link
+            href="/case-studies"
+            className="text-white/30 text-sm font-normal tracking-wide hover:text-white/50 transition-colors duration-500 min-h-[44px] inline-flex items-center"
+          >
+            Selected work
+          </Link>
+        </div>
       </div>
     </div>
   )
