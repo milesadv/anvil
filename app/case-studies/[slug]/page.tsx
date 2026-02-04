@@ -1,134 +1,245 @@
+"use client"
+
+import { useEffect, useState, useCallback, useRef, use } from "react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { caseStudies, getCaseStudy, getNextCaseStudy } from "@/lib/case-studies"
-import { BackgroundBlob } from "@/components/background-blob"
+import { getCaseStudy, getNextCaseStudy } from "@/lib/case-studies"
+
+// Particle component for hover effect (same as about page)
+function TextWithParticles({ children, className }: { children: React.ReactNode; className?: string }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; drift: number }>>([])
+  const particleId = useRef(0)
+
+  const spawnParticle = useCallback((e: React.MouseEvent) => {
+    if (!containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+
+    if (Math.random() > 0.25) return
+
+    const id = particleId.current++
+    const drift = (Math.random() - 0.5) * 24
+    setParticles(prev => [...prev.slice(-10), { id, x, y, drift }])
+
+    setTimeout(() => {
+      setParticles(prev => prev.filter(p => p.id !== id))
+    }, 1800)
+  }, [])
+
+  return (
+    <div
+      ref={containerRef}
+      className={`relative cursor-default ${className}`}
+      onMouseMove={spawnParticle}
+    >
+      {children}
+      {particles.map(particle => (
+        <span
+          key={particle.id}
+          className="absolute w-[2px] h-[2px] bg-white/30 rounded-full pointer-events-none animate-particle"
+          style={{
+            left: particle.x,
+            top: particle.y,
+            ['--drift' as string]: `${particle.drift}px`,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
 
 interface PageProps {
   params: Promise<{ slug: string }>
 }
 
-export async function generateStaticParams() {
-  return caseStudies.map((cs) => ({ slug: cs.slug }))
-}
-
-export async function generateMetadata({ params }: PageProps) {
-  const { slug } = await params
-  const caseStudy = getCaseStudy(slug)
-  if (!caseStudy) return {}
-
-  return {
-    title: `${caseStudy.title} | Anvil`,
-    description: caseStudy.description,
-  }
-}
-
-export default async function CaseStudyPage({ params }: PageProps) {
-  const { slug } = await params
+export default function CaseStudyPage({ params }: PageProps) {
+  const { slug } = use(params)
   const caseStudy = getCaseStudy(slug)
   const nextCaseStudy = getNextCaseStudy(slug)
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  useEffect(() => {
+    document.body.style.position = 'relative'
+    document.body.style.overflow = 'auto'
+    document.body.style.touchAction = 'pan-y'
+
+    const timer = setTimeout(() => setIsLoaded(true), 100)
+
+    return () => {
+      document.body.style.position = 'fixed'
+      document.body.style.overflow = 'hidden'
+      document.body.style.touchAction = 'none'
+      clearTimeout(timer)
+    }
+  }, [])
 
   if (!caseStudy) {
     notFound()
   }
 
   return (
-    <div className="scrollable-page min-h-screen bg-[#0a0a0a] relative">
-      <BackgroundBlob />
-
-      <div className="relative z-10">
+    <div className="w-full min-h-dvh bg-black relative overflow-y-auto overscroll-y-contain scroll-smooth">
+      <div className="w-full px-5 sm:px-8 md:px-12 lg:px-16 py-12 sm:py-16 pt-[calc(env(safe-area-inset-top)+2.5rem)] pb-[calc(env(safe-area-inset-bottom)+3rem)]">
         {/* Navigation */}
-        <nav className="fixed top-0 left-0 right-0 z-20 px-6 py-6 flex justify-between items-center">
+        <div
+          className="flex justify-between items-center mb-12 sm:mb-16"
+          style={{
+            opacity: isLoaded ? 1 : 0,
+            transform: isLoaded ? 'translateY(0)' : 'translateY(8px)',
+            transition: 'opacity 0.8s ease-out, transform 0.8s ease-out'
+          }}
+        >
           <Link
             href="/"
-            className="text-white/40 hover:text-white/70 text-sm tracking-[0.15em] transition-colors"
+            className="font-sans text-white/30 text-lg sm:text-xl font-medium tracking-[0.1em] hover:text-white/50 transition-colors duration-500 min-h-[44px] inline-flex items-center"
           >
             anvil.
           </Link>
           <Link
             href="/case-studies"
-            className="text-white/40 hover:text-white/70 text-sm tracking-wide transition-colors"
+            className="text-white/30 text-sm font-normal tracking-wide hover:text-white/50 transition-colors duration-500 min-h-[44px] inline-flex items-center"
           >
-            &larr; all work
+            all work
           </Link>
-        </nav>
+        </div>
 
-        {/* Hero */}
-        <header className="px-6 md:px-12 lg:px-24 pt-32 pb-16 max-w-5xl">
-          <span className="text-white/40 text-sm tracking-wide uppercase block mb-6">
+        {/* Subtitle */}
+        <div
+          style={{
+            opacity: isLoaded ? 1 : 0,
+            transform: isLoaded ? 'translateY(0)' : 'translateY(8px)',
+            transition: 'opacity 0.8s ease-out 0.1s, transform 0.8s ease-out 0.1s'
+          }}
+        >
+          <span className="text-white/30 text-[10px] sm:text-xs font-medium tracking-[0.25em] uppercase block mb-4 sm:mb-6">
             {caseStudy.subtitle}
           </span>
-          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-white/90 font-light leading-tight">
-            {caseStudy.title}
-          </h1>
-        </header>
+        </div>
 
-        {/* Content */}
-        <main className="px-6 md:px-12 lg:px-24 pb-24 max-w-4xl">
-          {/* Context */}
-          <section className="mb-16">
-            <h2 className="font-serif text-2xl text-white/70 mb-6">Context</h2>
-            <p className="text-white/50 text-lg leading-relaxed">
+        {/* Title */}
+        <h1
+          className="text-white/80 text-xl sm:text-2xl md:text-3xl tracking-[-0.01em] leading-relaxed mb-10 sm:mb-14 font-normal"
+          style={{
+            opacity: isLoaded ? 1 : 0,
+            transform: isLoaded ? 'translateY(0)' : 'translateY(8px)',
+            transition: 'opacity 0.8s ease-out 0.15s, transform 0.8s ease-out 0.15s'
+          }}
+        >
+          {caseStudy.title}
+        </h1>
+
+        {/* Context */}
+        <div
+          className="mb-12 sm:mb-16"
+          style={{
+            opacity: isLoaded ? 1 : 0,
+            transform: isLoaded ? 'translateY(0)' : 'translateY(8px)',
+            transition: 'opacity 0.8s ease-out 0.2s, transform 0.8s ease-out 0.2s'
+          }}
+        >
+          <h2 className="text-white/30 text-[10px] sm:text-xs font-medium tracking-[0.25em] uppercase mb-6 sm:mb-8">
+            Context
+          </h2>
+          <TextWithParticles className="text-white/45 hover:text-white/65 transition-colors duration-700">
+            <p className="text-sm sm:text-base font-normal leading-[1.85] max-w-2xl">
               {caseStudy.context}
             </p>
-          </section>
+          </TextWithParticles>
+        </div>
 
-          {/* Challenges */}
-          <section className="mb-16">
-            <h2 className="font-serif text-2xl text-white/70 mb-6">Challenges</h2>
-            <ul className="space-y-4">
-              {caseStudy.challenges.map((challenge, i) => (
-                <li key={i} className="text-white/50 text-lg leading-relaxed pl-6 relative">
-                  <span className="absolute left-0 text-white/30">&mdash;</span>
-                  {challenge}
-                </li>
-              ))}
-            </ul>
-          </section>
+        {/* Challenges */}
+        <div
+          className="mb-12 sm:mb-16"
+          style={{
+            opacity: isLoaded ? 1 : 0,
+            transform: isLoaded ? 'translateY(0)' : 'translateY(8px)',
+            transition: 'opacity 0.8s ease-out 0.3s, transform 0.8s ease-out 0.3s'
+          }}
+        >
+          <h2 className="text-white/30 text-[10px] sm:text-xs font-medium tracking-[0.25em] uppercase mb-6 sm:mb-8">
+            Challenges
+          </h2>
+          <div className="space-y-5 text-sm sm:text-base font-normal leading-[1.85]">
+            {caseStudy.challenges.map((challenge, i) => (
+              <TextWithParticles key={i} className="text-white/45 hover:text-white/65 transition-colors duration-700">
+                <p className="max-w-2xl">{challenge}</p>
+              </TextWithParticles>
+            ))}
+          </div>
+        </div>
 
-          {/* What we built */}
-          <section className="mb-16">
-            <h2 className="font-serif text-2xl text-white/70 mb-6">What we built</h2>
-            <ul className="space-y-4">
-              {caseStudy.whatWeBuilt.map((item, i) => (
-                <li key={i} className="text-white/50 text-lg leading-relaxed pl-6 relative">
-                  <span className="absolute left-0 text-white/30">&mdash;</span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </section>
+        {/* What we built */}
+        <div
+          className="mb-12 sm:mb-16"
+          style={{
+            opacity: isLoaded ? 1 : 0,
+            transform: isLoaded ? 'translateY(0)' : 'translateY(8px)',
+            transition: 'opacity 0.8s ease-out 0.4s, transform 0.8s ease-out 0.4s'
+          }}
+        >
+          <h2 className="text-white/30 text-[10px] sm:text-xs font-medium tracking-[0.25em] uppercase mb-6 sm:mb-8">
+            What we built
+          </h2>
+          <div className="space-y-5 text-sm sm:text-base font-normal leading-[1.85]">
+            {caseStudy.whatWeBuilt.map((item, i) => (
+              <TextWithParticles key={i} className="text-white/45 hover:text-white/65 transition-colors duration-700">
+                <p className="max-w-2xl">{item}</p>
+              </TextWithParticles>
+            ))}
+          </div>
+        </div>
 
-          {/* Impact */}
-          <section className="mb-24">
-            <h2 className="font-serif text-2xl text-white/70 mb-6">Impact</h2>
-            <ul className="space-y-4">
-              {caseStudy.impact.map((item, i) => (
-                <li key={i} className="text-white/50 text-lg leading-relaxed pl-6 relative">
-                  <span className="absolute left-0 text-white/30">&mdash;</span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </section>
+        {/* Impact */}
+        <div
+          className="mb-12 sm:mb-16"
+          style={{
+            opacity: isLoaded ? 1 : 0,
+            transform: isLoaded ? 'translateY(0)' : 'translateY(8px)',
+            transition: 'opacity 0.8s ease-out 0.5s, transform 0.8s ease-out 0.5s'
+          }}
+        >
+          <h2 className="text-white/30 text-[10px] sm:text-xs font-medium tracking-[0.25em] uppercase mb-6 sm:mb-8">
+            Impact
+          </h2>
+          <div className="space-y-5 text-sm sm:text-base font-normal leading-[1.85]">
+            {caseStudy.impact.map((item, i) => (
+              <TextWithParticles key={i} className="group text-white/45 hover:text-white/65 transition-colors duration-700">
+                <p className="max-w-2xl">
+                  <span className="text-white/55 group-hover:text-white/75 transition-colors duration-700">{item.split(' ')[0]}</span>
+                  <span className="mx-1" />
+                  {item.split(' ').slice(1).join(' ')}
+                </p>
+              </TextWithParticles>
+            ))}
+          </div>
+        </div>
 
-          {/* Navigation */}
-          <footer className="border-t border-white/10 pt-12 flex flex-col sm:flex-row justify-between gap-8">
+        {/* Navigation */}
+        <div
+          className="pt-8 sm:pt-12 border-t border-white/10 flex flex-col sm:flex-row justify-between gap-6"
+          style={{
+            opacity: isLoaded ? 1 : 0,
+            transform: isLoaded ? 'translateY(0)' : 'translateY(8px)',
+            transition: 'opacity 0.8s ease-out 0.6s, transform 0.8s ease-out 0.6s'
+          }}
+        >
+          <Link
+            href="/case-studies"
+            className="text-white/30 text-sm font-normal tracking-wide hover:text-white/50 transition-colors duration-500 min-h-[44px] inline-flex items-center"
+          >
+            Back to work
+          </Link>
+          {nextCaseStudy && (
             <Link
-              href="/case-studies"
-              className="text-white/40 hover:text-white/70 text-sm tracking-wide transition-colors"
+              href={`/case-studies/${nextCaseStudy.slug}`}
+              className="text-white/30 text-sm font-normal tracking-wide hover:text-white/50 transition-colors duration-500 min-h-[44px] inline-flex items-center"
             >
-              &larr; Back to work
+              Next: {nextCaseStudy.title}
             </Link>
-            {nextCaseStudy && (
-              <Link
-                href={`/case-studies/${nextCaseStudy.slug}`}
-                className="text-white/40 hover:text-white/70 text-sm tracking-wide transition-colors text-right"
-              >
-                Next: {nextCaseStudy.title} &rarr;
-              </Link>
-            )}
-          </footer>
-        </main>
+          )}
+        </div>
       </div>
     </div>
   )
