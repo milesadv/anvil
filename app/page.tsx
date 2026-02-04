@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-
+import Link from "next/link"
 import { Canvas } from "@react-three/fiber"
 import { useState, useCallback, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -248,6 +248,16 @@ export default function Page() {
           ))}
         </button>
       </div>
+
+      {/* Our work link - bottom left */}
+      {mode === "idle" && (
+        <Link
+          href="/case-studies"
+          className="absolute bottom-6 left-6 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] text-white/40 hover:text-white/70 text-sm tracking-wide transition-colors"
+        >
+          our work
+        </Link>
+      )}
 
       {/* Audio upload - hidden for now */}
       <input
