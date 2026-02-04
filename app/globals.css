@@ -45,3 +45,16 @@
     border-color: rgba(255, 255, 255, 0.4);
   }
 }
+
+/* Scrollable pages (case studies) */
+html:has(.scrollable-page) {
+  overflow: auto;
+  height: auto;
+}
+
+html:has(.scrollable-page) body {
+  position: static;
+  overflow: auto;
+  touch-action: auto;
+  height: auto;
+}

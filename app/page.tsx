@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-
+import Link from "next/link"
 import { Canvas } from "@react-three/fiber"
 import { useState, useCallback, useRef, useEffect } from "react"
 import { AudioParticles } from "@/components/audio-particles"
@@ -218,7 +218,7 @@ export default function Page() {
       {/* Audio upload - bottom left */}
       {mode === "idle" && (
         <div
-          className="absolute bottom-6 left-6 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]"
+          className="absolute bottom-6 left-6 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] flex items-center gap-6"
           onDragOver={(e) => {
             e.preventDefault()
             setIsDragging(true)
@@ -242,6 +242,12 @@ export default function Page() {
             onChange={handleAudioSelect}
             className="hidden"
           />
+          <Link
+            href="/case-studies"
+            className="text-white/40 hover:text-white/70 text-sm tracking-wide transition-colors"
+          >
+            our work
+          </Link>
         </div>
       )}
 
