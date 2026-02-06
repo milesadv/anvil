@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Anvil",
-  description: "Crafting foundations",
+  title: "anvil.",
+  description: "forging foundations",
 }
 
 export const viewport: Viewport = {
