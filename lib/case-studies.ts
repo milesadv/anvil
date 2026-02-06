@@ -17,7 +17,7 @@ export const caseStudies: CaseStudy[] = [
     description:
       "A comprehensive platform enabling construction firms to plan, track, and control project costs across their entire portfolio.",
     context:
-      "A leading construction company managing multi-million dollar projects needed to replace their fragmented spreadsheet-based cost tracking with an integrated solution. Project managers were spending hours reconciling data, and leadership lacked real-time visibility into portfolio-wide financials.",
+      "A leading construction company managing multi-million pound projects needed to replace their fragmented spreadsheet-based cost tracking with an integrated solution. Project managers were spending hours reconciling data, and leadership lacked real-time visibility into portfolio-wide financials.",
     challenges: [
       "Fragmented data across dozens of spreadsheets with no single source of truth",
       "Manual reconciliation consuming 15+ hours per project manager weekly",
