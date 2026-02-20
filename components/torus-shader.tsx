@@ -1,17 +1,16 @@
 "use client"
 
-import { useRef, useMemo, useState } from "react"
+import { useRef, useMemo, useState, useCallback } from "react"
 import { useFrame, useThree } from "@react-three/fiber"
 import * as THREE from "three"
 
 export function TorusShader() {
-  const pointsRef = useRef<THREE.Points>(null)
-  const materialRef = useRef<THREE.ShaderMaterial>(null)
+  const pointsRef = useRef<THREE.Points | null>(null)
   const [mouse3D, setMouse3D] = useState(new THREE.Vector3(0, 0, -10))
   const { camera } = useThree()
 
   // Create expanded wave-like particle field
-  const { positions } = useMemo(() => {
+  const geometry = useMemo(() => {
     const numParticles = 35000
     const posArray = new Float32Array(numParticles * 3)
 
@@ -43,7 +42,9 @@ export function TorusShader() {
       posArray[i * 3 + 2] = z * waveRadius * stretchZ
     }
 
-    return { positions: posArray, count: numParticles }
+    const geo = new THREE.BufferGeometry()
+    geo.setAttribute('position', new THREE.BufferAttribute(posArray, 3))
+    return geo
   }, [])
 
   // Custom shader material
@@ -177,6 +178,14 @@ export function TorusShader() {
     [],
   )
 
+  const setRef = useCallback((el: THREE.Points | null) => {
+    pointsRef.current = el
+    if (el) {
+      el.geometry = geometry
+      el.material = shaderMaterial
+    }
+  }, [geometry, shaderMaterial])
+
   const handlePointerMove = (event: any) => {
     if (!pointsRef.current) return
 
@@ -198,21 +207,16 @@ export function TorusShader() {
 
   // Animation loop
   useFrame((state) => {
-    if (pointsRef.current && materialRef.current) {
+    if (pointsRef.current) {
       pointsRef.current.rotation.y += 0.005
       pointsRef.current.rotation.x += 0.002
 
-      materialRef.current.uniforms.uTime.value = state.clock.elapsedTime
-      materialRef.current.uniforms.uMouse.value.copy(mouse3D)
+      shaderMaterial.uniforms.uTime.value = state.clock.elapsedTime
+      shaderMaterial.uniforms.uMouse.value.copy(mouse3D)
     }
   })
 
   return (
-    <points ref={pointsRef} onPointerMove={handlePointerMove}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-      </bufferGeometry>
-      <primitive object={shaderMaterial} ref={materialRef} attach="material" />
-    </points>
+    <points ref={setRef} onPointerMove={handlePointerMove} />
   )
 }

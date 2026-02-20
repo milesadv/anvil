@@ -24,7 +24,7 @@ export interface AudioData {
   filterFrequency: number
 }
 
-export interface AudioAnalyzerControls {
+interface AudioAnalyzerControls {
   play: () => void
   pause: () => void
   toggle: () => void
